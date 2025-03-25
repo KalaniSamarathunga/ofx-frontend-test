@@ -1,0 +1,32 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-weight: bold;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+  padding: 8px;
+  background-color: white;
+}
+
+.leftIcon {
+  margin-right: 8px;
+}
+
+.input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+.input::placeholder {
+  color: #999;
+}
