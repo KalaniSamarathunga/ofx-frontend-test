@@ -68,6 +68,11 @@ const Rates = () => {
     }
   };
 
+  const { trueAmount, markedUpAmount } = calculationConversion(
+    parseFloat(amount) || 0, // Convert input amount to a number (default to 0 if empty)
+    exchangeRate
+  );
+
   return (
     <div className={classes.container}>
       <div className={classes.content}>
@@ -127,6 +132,19 @@ const Rates = () => {
             />
           </div>
         </div>
+        <div
+          className={classes.conversionResults}
+          style={{ marginBottom: "20px" }}
+        >
+          <div className={classes.result}>
+            <span>True Amount (No Markup):</span>
+            <span>{inputError ? "N/A" : trueAmount.toFixed(2)}</span>
+          </div>
+          <div className={classes.result}>
+            <span>Marked-Up Amount (With Markup):</span>
+            <span>{inputError ? "N/A" : markedUpAmount.toFixed(2)}</span>
+          </div>
+        </div>
 
         <ProgressBar
           progress={progression}
@@ -145,3 +163,11 @@ const Rates = () => {
 };
 
 export default Rates;
+
+//Function to calculate true amount and marked-up amount
+const calculationConversion = (amount, rate, markup = 0.005) => {
+  const trueAmount = amount * rate; // True amount without markup
+  const markedUpRate = rate * (1 - markup); // Apply markup to the rate
+  const markedUpAmount = amount * markedUpRate; // Amount with markup
+  return { trueAmount, markedUpAmount };
+};

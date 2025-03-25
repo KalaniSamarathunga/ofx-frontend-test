@@ -68,3 +68,25 @@
   margin-bottom: 20px;
   font-size: 14px;
 }
+
+.conversionResults {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.result {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border: 1px solid #e5e5e5;
+  border-radius: 4px;
+}
+
+.result span {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
