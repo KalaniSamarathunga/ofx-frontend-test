@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DropDown from "../../Components/DropDown";
 import ProgressBar from "../../Components/ProgressBar";
 import Loader from "../../Components/Loader";
@@ -19,11 +19,12 @@ const Rates = () => {
   const [toCurrency, setToCurrency] = useState("US");
   const [amount, setAmount] = useState("1000");
 
-  const [exchangeRate, setExchangeRate] = useState(0.7456);
+  const [exchangeRate, setExchangeRate] = useState(null);
   const [progression, setProgression] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const [inputError, setInputError] = useState(null);
+  const [error, setError] = useState(null);
 
   const Flag = ({ code }) => (
     <img
@@ -37,18 +38,42 @@ const Rates = () => {
   const fetchData = async () => {
     if (!loading) {
       setLoading(true);
+      setExchangeRate(null);
+      setError(null);
+      try {
+        const sellCurrency = countryToCurrency[fromCurrency]; // Convert country code to currency code
+        const buyCurrency = countryToCurrency[toCurrency];
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+        const respone = await fetch(
+          `https://rates.staging.api.paytron.com/rate/public?sellCurrency=${sellCurrency}&buyCurrency=${buyCurrency}`
+        );
 
-      setLoading(false);
+        if (!respone.ok) {
+          const errorData = await respone.json(); // Parse the error response
+          throw new Error(errorData.detail || "Failed to fetch exchange rate");
+        }
+        const data = await respone.json();
+        setExchangeRate(data.retailRate); // Update the exchange rate with retailRate
+      } catch (error) {
+        setExchangeRate(null); // Reset exchange rate
+        console.error("Error fetching exchange rate:", error);
+        setError(error.message); // Set error message
+      } finally {
+        setLoading(false);
+      }
     }
   };
+
+  // Fetch initial rate when the componenet mounts
+  useEffect(() => {
+    fetchData();
+  }, [fromCurrency, toCurrency]); // Refetch rate when fromCurrency or toCurrency changes
 
   // Demo progress bar moving :)
   useAnimationFrame(!loading, (deltaTime) => {
     setProgression((prevState) => {
       if (prevState > 0.998) {
-        fetchData();
+        fetchData(); // Fetch latest data when progress bar completes
         return 0;
       }
       return (prevState + deltaTime * 0.0001) % 1;
@@ -138,14 +163,30 @@ const Rates = () => {
         >
           <div className={classes.result}>
             <span>True Amount (No Markup):</span>
-            <span>{inputError ? "N/A" : trueAmount.toFixed(2)}</span>
+            <span>
+              {loading
+                ? ""
+                : error || inputError
+                ? "N/A"
+                : trueAmount.toFixed(2)}
+            </span>
           </div>
           <div className={classes.result}>
             <span>Marked-Up Amount (With Markup):</span>
-            <span>{inputError ? "N/A" : markedUpAmount.toFixed(2)}</span>
+            <span>
+              {loading
+                ? ""
+                : error || inputError
+                ? "N/A"
+                : markedUpAmount.toFixed(2)}
+            </span>
           </div>
         </div>
-
+        {error && (
+          <div className={classes.error}>
+            <span>{error}</span>
+          </div>
+        )}
         <ProgressBar
           progress={progression}
           animationClass={loading ? classes.slow : ""}
